@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{MERCHANT_NAME}} - Opportunity Confidence Report</title>
+<style>
+  /*
+    Typography contract:
+    - Persistent report title: Circus Display
+    - Opportunity name: Chlakh
+    - All other text: Geist
+    The stacks below preserve the requested font names and include professional fallbacks
+    so the slide remains usable if those display fonts are not installed locally.
+  */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --font-report-title: "Circus Display", "CircusDisplay", "Arial Black", Impact, sans-serif;
+    --font-opportunity: "Chlakh", "Chlakh Display", "Bodoni 72", "Didot", Georgia, serif;
+    --font-body: "Geist", "Geist Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --bg: #07110f;
+    --surface: #101a18;
+    --surface-2: #172320;
+    --line: rgba(205, 255, 222, .16);
+    --line-strong: rgba(149, 191, 71, .34);
+    --text: #f4fbf7;
+    --muted: rgba(244, 251, 247, .68);
+    --soft: rgba(244, 251, 247, .52);
+    --shopify: #95bf47;
+    --shopify-soft: rgba(149, 191, 71, .14);
+    --green: #00a678;
+    --gold: #f3c96b;
+  }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+  }
+  .slide {
+    width: 100vw;
+    height: 100vh;
+    min-width: 960px;
+    min-height: 540px;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 18% 8%, rgba(149,191,71,.18), transparent 28%),
+      linear-gradient(135deg, #081412 0%, #0c1715 48%, #050807 100%);
+  }
+  .slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .18;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 52px 52px;
+  }
+  .slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(circle at 58% 52%, rgba(149,191,71,.11), transparent 44%);
+    pointer-events: none;
+  }
+  .matrix-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .matrix-bg span {
+    position: absolute;
+    top: -34vh;
+    width: 1.2em;
+    color: rgba(149,191,71,.38);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: clamp(13px, 1vw, 17px);
+    line-height: 1.05;
+    font-weight: 700;
+    text-align: center;
+    text-shadow: 0 0 12px rgba(149,191,71,.42);
+    filter: blur(.7px);
+    opacity: .46;
+    animation: matrixFall 16s linear infinite;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+  .matrix-bg span:nth-child(1) { left: 4%; animation-duration: 17s; animation-delay: -7s; opacity: .32; }
+  .matrix-bg span:nth-child(2) { left: 12%; animation-duration: 20s; animation-delay: -2s; opacity: .42; }
+  .matrix-bg span:nth-child(3) { left: 21%; animation-duration: 15s; animation-delay: -9s; opacity: .3; }
+  .matrix-bg span:nth-child(4) { left: 31%; animation-duration: 22s; animation-delay: -5s; opacity: .48; }
+  .matrix-bg span:nth-child(5) { left: 43%; animation-duration: 18s; animation-delay: -11s; opacity: .34; }
+  .matrix-bg span:nth-child(6) { left: 56%; animation-duration: 24s; animation-delay: -3s; opacity: .5; }
+  .matrix-bg span:nth-child(7) { left: 69%; animation-duration: 19s; animation-delay: -12s; opacity: .36; }
+  .matrix-bg span:nth-child(8) { left: 81%; animation-duration: 16s; animation-delay: -6s; opacity: .46; }
+  .matrix-bg span:nth-child(9) { left: 92%; animation-duration: 21s; animation-delay: -10s; opacity: .3; }
+  .matrix-bg span:nth-child(10) { left: 8%; animation-duration: 26s; animation-delay: -15s; opacity: .24; font-size: clamp(11px, .88vw, 15px); }
+  .matrix-bg span:nth-child(11) { left: 17%; animation-duration: 14s; animation-delay: -4s; opacity: .4; font-size: clamp(12px, .95vw, 16px); }
+  .matrix-bg span:nth-child(12) { left: 27%; animation-duration: 27s; animation-delay: -18s; opacity: .26; font-size: clamp(11px, .85vw, 15px); }
+  .matrix-bg span:nth-child(13) { left: 38%; animation-duration: 16s; animation-delay: -13s; opacity: .44; font-size: clamp(13px, 1vw, 17px); }
+  .matrix-bg span:nth-child(14) { left: 49%; animation-duration: 23s; animation-delay: -8s; opacity: .28; font-size: clamp(11px, .9vw, 15px); }
+  .matrix-bg span:nth-child(15) { left: 62%; animation-duration: 15s; animation-delay: -1s; opacity: .38; font-size: clamp(12px, .96vw, 16px); }
+  .matrix-bg span:nth-child(16) { left: 74%; animation-duration: 25s; animation-delay: -17s; opacity: .25; font-size: clamp(11px, .86vw, 15px); }
+  .matrix-bg span:nth-child(17) { left: 87%; animation-duration: 18s; animation-delay: -14s; opacity: .42; font-size: clamp(13px, 1vw, 17px); }
+  @keyframes matrixFall {
+    from { transform: translate3d(0, -12vh, 0); }
+    to { transform: translate3d(0, 142vh, 0); }
+  }
+  .top {
+    position: relative;
+    z-index: 1;
+    height: 27vh;
+    min-height: 154px;
+    padding: 3.5vh 3.6vw 2.4vh;
+    border-bottom: 1px solid var(--line-strong);
+    background: linear-gradient(180deg, #07120f, #050c0a);
+  }
+  .brand {
+    position: absolute;
+    top: 2.2vh;
+    right: 2.2vw;
+    color: var(--soft);
+    font-size: clamp(9px, .8vw, 12px);
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .brand::before { content: "◆ "; color: var(--shopify); }
+  .mini-radar {
+    position: absolute;
+    top: 5.2vh;
+    right: 2.2vw;
+    width: clamp(118px, 13vw, 178px);
+    aspect-ratio: 1;
+    opacity: .92;
+    pointer-events: none;
+  }
+  .mini-radar svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 14px 28px rgba(0,0,0,.34));
+  }
+  .mini-radar .radar-scan {
+    transform-origin: 250px 250px;
+    animation: radarSweep 7s linear infinite;
+    opacity: .52;
+  }
+  @keyframes radarSweep {
+    to { transform: rotate(360deg); }
+  }
+  .mini-radar .radar-axis-label {
+    fill: rgba(244,251,247,.72);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .mini-radar .radar-axis-score {
+    fill: var(--shopify);
+    font-family: var(--font-body);
+    font-size: 28px;
+    font-weight: 950;
+  }
+  .mini-radar .radar-core {
+    fill: var(--text);
+    font-family: var(--font-body);
+    font-size: 40px;
+    font-weight: 950;
+  }
+  .kicker {
+    color: var(--shopify);
+    font-family: var(--font-report-title);
+    font-size: clamp(20px, 2.6vw, 34px);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  h1 {
+    margin-top: 1.2vh;
+    max-width: 82vw;
+    color: var(--text);
+    font-family: var(--font-opportunity);
+    font-size: clamp(54px, 7.2vw, 104px);
+    line-height: .9;
+    font-weight: 700;
+    letter-spacing: .01em;
+    text-transform: none;
+    text-shadow: 0 18px 46px rgba(0,0,0,.42);
+  }
+  .tagline {
+    margin-top: 1.65vh;
+    max-width: 78vw;
+    color: var(--muted);
+    font-size: clamp(13px, 1.08vw, 17px);
+    line-height: 1.35;
+    font-weight: 560;
+    letter-spacing: 0;
+  }
+  .meta {
+    margin-top: 1.25vh;
+    color: var(--soft);
+    font-size: clamp(10px, .82vw, 12px);
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .content {
+    position: relative;
+    z-index: 1;
+    height: 73vh;
+    padding: 3vh 3.2vw 2.8vh;
+  }
+  .hero {
+    display: grid;
+    grid-template-columns: 22% 1fr;
+    align-items: center;
+    min-height: 21vh;
+    padding: 2.5vh 2.4vw;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: linear-gradient(160deg, #172320 0%, #0d1715 100%);
+    box-shadow: 0 20px 54px rgba(0,0,0,.28);
+  }
+  .overall {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .overall .pct {
+    color: var(--text);
+    font-size: clamp(64px, 8.3vw, 112px);
+    line-height: .8;
+    font-weight: 900;
+    letter-spacing: -.05em;
+  }
+  .overall .pct span { font-size: .42em; opacity: .48; letter-spacing: -.02em; }
+  .status {
+    margin-top: 1.7vh;
+    padding: .85vh 1.25vw;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--shopify);
+    background: var(--shopify-soft);
+    font-size: clamp(9px, .82vw, 12px);
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .rec h2 {
+    color: var(--shopify);
+    font-size: clamp(22px, 2vw, 31px);
+    line-height: 1.1;
+    margin-bottom: 1.25vh;
+    font-weight: 850;
+  }
+  .rec p {
+    color: rgba(255,255,255,.86);
+    font-size: clamp(14px, 1.15vw, 18px);
+    line-height: 1.42;
+    font-weight: 560;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.1vw;
+    margin-top: 2.4vh;
+  }
+  .card {
+    min-height: 17vh;
+    padding: 2vh 1.35vw 1.65vh;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--green);
+    border-radius: 10px;
+    background: linear-gradient(160deg, #172320 0%, #0d1715 100%);
+    text-align: center;
+    box-shadow: 0 14px 34px rgba(0,0,0,.22);
+  }
+  .card:nth-child(2) { border-top-color: var(--shopify); }
+  .card:nth-child(3) { border-top-color: var(--green); }
+  .card:nth-child(4) { border-top-color: var(--shopify); }
+  .label {
+    color: var(--muted);
+    font-size: clamp(9px, .8vw, 11px);
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .score {
+    margin-top: 1.8vh;
+    font-size: clamp(48px, 5.5vw, 76px);
+    line-height: .82;
+    font-weight: 900;
+    letter-spacing: -.04em;
+  }
+  .score span { font-size: .42em; opacity: .5; }
+  .score-bar {
+    width: min(100%, 168px);
+    height: 7px;
+    margin: 1.25vh auto 0;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(244,251,247,.11);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .score-bar span {
+    display: block;
+    width: var(--score-width);
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--green), var(--shopify));
+    box-shadow: 0 0 18px rgba(149,191,71,.34);
+  }
+  details.score-details {
+    position: relative;
+    display: inline-block;
+    margin-top: 1vh;
+  }
+  details.score-details summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 0 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--shopify-soft);
+    color: #dff3b0;
+    font-size: clamp(9px, .8vw, 11px);
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  details.score-details summary::-webkit-details-marker { display: none; }
+  details.score-details[open] summary {
+    background: rgba(149,191,71,.22);
+    color: #fff;
+  }
+  .details-panel {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    width: min(300px, 24vw);
+    padding: 12px 13px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: rgba(8, 14, 13, .98);
+    color: rgba(255,255,255,.88);
+    box-shadow: 0 14px 36px rgba(0,0,0,.48);
+    font-size: clamp(11px, .86vw, 13px);
+    line-height: 1.36;
+    text-align: left;
+  }
+  .synopsis {
+    margin-top: 2.35vh;
+    min-height: 12.4vh;
+    padding: 1.85vh 1.65vw;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: linear-gradient(160deg, #172320 0%, #0d1715 100%);
+  }
+  .synopsis h3 {
+    color: var(--shopify);
+    font-size: clamp(10px, .85vw, 12px);
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 1.1vh;
+  }
+  .synopsis p {
+    color: rgba(255,255,255,.86);
+    font-size: clamp(13px, 1.05vw, 16px);
+    line-height: 1.42;
+    font-weight: 540;
+  }
+  .additional-info {
+    position: relative;
+    display: inline-block;
+    margin-top: 1.25vh;
+  }
+  .additional-info summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--shopify-soft);
+    color: #dff3b0;
+    font-size: clamp(10px, .82vw, 12px);
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .additional-info summary::-webkit-details-marker { display: none; }
+  .additional-info[open] summary {
+    background: rgba(149,191,71,.22);
+    color: #fff;
+  }
+  .additional-info-panel {
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    bottom: calc(100% + 8px);
+    width: min(520px, 42vw);
+    padding: 13px 15px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: rgba(8, 14, 13, .98);
+    color: rgba(255,255,255,.9);
+    box-shadow: 0 16px 42px rgba(0,0,0,.5);
+    font-size: clamp(11px, .9vw, 13px);
+    line-height: 1.38;
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+  <main class="slide">
+    <div class="matrix-bg" aria-hidden="true">
+      <span>010110100101101001011010010110100101</span>
+      <span>101001011001011010010110010110100101</span>
+      <span>001101010110100101101001011001011010</span>
+      <span>110010110100101101001011010010110010</span>
+      <span>011010010110010110100101101001011001</span>
+      <span>101101001011001011010010110100101101</span>
+      <span>010010110100101100101101001011010010</span>
+      <span>100101101001011010010110010110100101</span>
+      <span>011001011010010110100101100101101001</span>
+      <span>1011001010010110100110010101101001010110100101</span>
+      <span>010010110100101101001011001011010010110</span>
+      <span>1101001011001011010010110100101100101101001</span>
+      <span>001011010010110100101100101101001011001</span>
+      <span>101001011001011010010110100101100101101</span>
+      <span>0110100101100101101001011010010110010110</span>
+      <span>1001011010010110010110100101101001011001</span>
+      <span>010110100101101001011001011010010110010</span>
+    </div>
+    <section class="top">
+      <div class="brand">Shopify SE</div>
+      <div class="mini-radar" aria-hidden="true">
+        <svg viewBox="0 0 500 500">
+          <defs>
+            <radialGradient id="miniRadarGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#00c896" stop-opacity="0.26"/>
+              <stop offset="72%" stop-color="#00c896" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#00c896" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="miniDealPoly" x1="0%" x2="100%" y1="0%" y2="100%">
+              <stop offset="0%" stop-color="#95bf47" stop-opacity="0.72"/>
+              <stop offset="100%" stop-color="#00a678" stop-opacity="0.46"/>
+            </linearGradient>
+          </defs>
+          <circle cx="250" cy="250" r="218" fill="url(#miniRadarGlow)"/>
+          <circle cx="250" cy="250" r="45" fill="none" stroke="#95bf47" stroke-opacity="0.17"/>
+          <circle cx="250" cy="250" r="90" fill="none" stroke="#95bf47" stroke-opacity="0.17"/>
+          <circle cx="250" cy="250" r="135" fill="none" stroke="#95bf47" stroke-opacity="0.17"/>
+          <circle cx="250" cy="250" r="180" fill="none" stroke="#95bf47" stroke-opacity="0.26"/>
+          <line x1="250" y1="70" x2="250" y2="430" stroke="#95bf47" stroke-opacity="0.22"/>
+          <line x1="70" y1="250" x2="430" y2="250" stroke="#95bf47" stroke-opacity="0.22"/>
+          <line x1="123" y1="123" x2="377" y2="377" stroke="#95bf47" stroke-opacity="0.13"/>
+          <line x1="377" y1="123" x2="123" y2="377" stroke="#95bf47" stroke-opacity="0.13"/>
+          <path class="radar-scan" d="M250 250 L250 70 A180 180 0 0 1 377 123 Z" fill="#95bf47" fill-opacity="0.12"/>
+          <polygon points="{{RADAR_POINTS}}" fill="url(#miniDealPoly)" stroke="#d7ff8c" stroke-width="2"/>
+          <circle cx="250" cy="{{RADAR_COMMERCIAL_Y}}" r="5" fill="#d7ff8c"/>
+          <circle cx="{{RADAR_TECHNICAL_X}}" cy="250" r="5" fill="#f3c96b"/>
+          <circle cx="250" cy="{{RADAR_LAUNCH_Y}}" r="5" fill="#95bf47"/>
+          <circle cx="{{RADAR_MOMENTUM_X}}" cy="250" r="5" fill="#00c896"/>
+          <text x="250" y="48" text-anchor="middle" class="radar-axis-score">{{COMMERCIAL}}</text>
+          <text x="454" y="258" text-anchor="end" class="radar-axis-score">{{TECHNICAL}}</text>
+          <text x="250" y="482" text-anchor="middle" class="radar-axis-score">{{LAUNCH_CONFIDENCE}}</text>
+          <text x="46" y="258" text-anchor="start" class="radar-axis-score">{{MOMENTUM}}</text>
+          <text x="250" y="246" text-anchor="middle" class="radar-core">{{OVERALL_SCORE}}%</text>
+          <text x="250" y="270" text-anchor="middle" class="radar-axis-label">Composite</text>
+        </svg>
+      </div>
+      <div class="kicker">Opportunity Confidence Report</div>
+      <h1>{{MERCHANT_NAME}}</h1>
+      <p class="tagline">{{ONE_LINE_SUMMARY}}</p>
+      <p class="meta">{{METADATA_LINE}}</p>
+    </section>
+    <section class="content">
+      <section class="hero">
+        <div class="overall">
+          <div class="pct">{{OVERALL_SCORE}}<span>%</span></div>
+          <div class="status">{{STATUS_LABEL}}</div>
+        </div>
+        <div class="rec">
+          <h2>{{RECOMMENDATION}}</h2>
+          <p><strong>Deal consensus:</strong> {{DEAL_CONSENSUS}}</p>
+        </div>
+      </section>
+      <section class="cards">
+        <article class="card">
+          <div class="label">Commercial Fit</div>
+          <div class="score">{{COMMERCIAL}}<span>%</span></div>
+          <div class="score-bar" aria-hidden="true"><span style="--score-width: {{COMMERCIAL}}%;"></span></div>
+          <details class="score-details">
+            <summary>Details</summary>
+            <div class="details-panel">{{COMMERCIAL_DETAILS}}</div>
+          </details>
+        </article>
+        <article class="card">
+          <div class="label">Technical Fit</div>
+          <div class="score">{{TECHNICAL}}<span>%</span></div>
+          <div class="score-bar" aria-hidden="true"><span style="--score-width: {{TECHNICAL}}%;"></span></div>
+          <details class="score-details">
+            <summary>Details</summary>
+            <div class="details-panel">{{TECHNICAL_DETAILS}}</div>
+          </details>
+        </article>
+        <article class="card">
+          <div class="label">Momentum</div>
+          <div class="score">{{MOMENTUM}}<span>%</span></div>
+          <div class="score-bar" aria-hidden="true"><span style="--score-width: {{MOMENTUM}}%;"></span></div>
+          <details class="score-details">
+            <summary>Details</summary>
+            <div class="details-panel">{{MOMENTUM_DETAILS}}</div>
+          </details>
+        </article>
+        <article class="card">
+          <div class="label">Launch Confidence</div>
+          <div class="score">{{LAUNCH_CONFIDENCE}}<span>%</span></div>
+          <div class="score-bar" aria-hidden="true"><span style="--score-width: {{LAUNCH_CONFIDENCE}}%;"></span></div>
+          <details class="score-details">
+            <summary>Details</summary>
+            <div class="details-panel">{{LAUNCH_CONFIDENCE_DETAILS}}</div>
+          </details>
+        </article>
+      </section>
+      <section class="synopsis">
+        <h3>Synopsis</h3>
+        <p>{{SYNOPSIS}}</p>
+        {{ADDITIONAL_INFO_SECTION}}
+      </section>
+    </section>
+  </main>
+</body>
+</html>

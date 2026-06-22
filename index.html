@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opportunity Confidence Skill</title>
+  <meta name="description" content="Install and test the Opportunity Confidence skill for Claude, Cursor, Pi, and Codex.">
+  <style>
+    :root {
+      --ink: #102018;
+      --muted: #5a6a61;
+      --line: #dce7df;
+      --panel: #ffffff;
+      --soft: #f3f8f4;
+      --green: #95bf47;
+      --green-dark: #4c7f28;
+      --blue: #e9f6ff;
+      --code: #101815;
+      --code-text: #d9f8df;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(149,191,71,.18), transparent 34rem),
+        linear-gradient(180deg, #fbfdfb 0%, #eef7f0 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 56px 0 72px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+      gap: 32px;
+      align-items: end;
+      padding-bottom: 34px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      margin-bottom: 18px;
+      padding: 7px 11px;
+      border: 1px solid rgba(76,127,40,.25);
+      border-radius: 999px;
+      color: var(--green-dark);
+      background: rgba(255,255,255,.74);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 780px;
+      margin-bottom: 18px;
+      font-size: clamp(44px, 7vw, 82px);
+      line-height: .95;
+      letter-spacing: 0;
+    }
+
+    .lede {
+      max-width: 720px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 22px);
+      font-weight: 520;
+    }
+
+    .quick-card {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 18px 44px rgba(28,55,38,.08);
+    }
+
+    .quick-card h2 {
+      margin-bottom: 14px;
+      font-size: 18px;
+    }
+
+    .quick-card dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px 14px;
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .quick-card dt {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .quick-card dd {
+      margin: 0;
+      font-weight: 750;
+    }
+
+    main {
+      display: grid;
+      gap: 30px;
+      padding-top: 34px;
+    }
+
+    section {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 12px 34px rgba(28,55,38,.06);
+    }
+
+    h2 {
+      margin-bottom: 16px;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.08;
+    }
+
+    .section-intro {
+      max-width: 790px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .tile {
+      min-height: 154px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .tile strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .tile span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 550;
+    }
+
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 18px;
+      margin: 22px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .benefits li {
+      padding-left: 28px;
+      position: relative;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .benefits li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .45em;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: inset 0 0 0 4px #dff0c8;
+    }
+
+    .install-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .install-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .install-card h3 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 17px;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      color: var(--green-dark);
+      background: #edf7e3;
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow-x: auto;
+      color: var(--code-text);
+      background: var(--code);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    .note {
+      margin: 18px 0 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--green);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+      background: var(--blue);
+      font-weight: 620;
+    }
+
+    .test-block {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .prompt {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: #1f2d25;
+      background: #f9fbfa;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    footer {
+      padding-top: 24px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 860px) {
+      header,
+      .grid,
+      .benefits,
+      .install-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        width: min(100% - 28px, 1120px);
+        padding-top: 32px;
+      }
+
+      section {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <div class="eyebrow">Shopify Sales Skill</div>
+        <h1>Opportunity Confidence</h1>
+        <p class="lede">A qualification skill that reviews Shopify B2B and Plus opportunities and produces a clear, executive-ready confidence report.</p>
+      </div>
+      <aside class="quick-card" aria-label="Skill summary">
+        <h2>At a glance</h2>
+        <dl>
+          <dt>Output</dt>
+          <dd>HTML scorecard</dd>
+          <dt>Use case</dt>
+          <dd>Deal qualification</dd>
+          <dt>Works in</dt>
+          <dd>Claude, Cursor, Pi, Codex</dd>
+          <dt>Decisions</dt>
+          <dd>Proceed, Hold, Need Information, Potential DQ</dd>
+        </dl>
+      </aside>
+    </header>
+
+    <main>
+      <section>
+        <h2>What It Does</h2>
+        <p class="section-intro">Opportunity Confidence evaluates a sales opportunity across four equally weighted dimensions, then turns the analysis into an easy-to-share confidence report with an overall score, recommendation, rationale, and expandable supporting detail.</p>
+        <div class="grid">
+          <div class="tile">
+            <strong>Commercial Fit</strong>
+            <span>Assesses pain, value, buyer access, budget signal, and procurement path.</span>
+          </div>
+          <div class="tile">
+            <strong>Technical Fit</strong>
+            <span>Checks whether Shopify capabilities, integrations, and data requirements have a credible path.</span>
+          </div>
+          <div class="tile">
+            <strong>Momentum</strong>
+            <span>Reviews buyer engagement, next steps, urgency, and whether progress is buyer-owned.</span>
+          </div>
+          <div class="tile">
+            <strong>Launch Confidence</strong>
+            <span>Evaluates time to value, implementation ownership, dependencies, launch plan, and first-value readiness.</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Why Teams Should Use It</h2>
+        <p class="section-intro">The skill helps teams make qualification decisions with less ambiguity and stronger evidence discipline.</p>
+        <ul class="benefits">
+          <li>Identifies whether an opportunity is worth continued sales and solutioning investment.</li>
+          <li>Surfaces commercial, technical, buyer, and launch risks before they become blockers.</li>
+          <li>Highlights missing information when the score cannot be trusted yet.</li>
+          <li>Separates real buyer momentum from internal optimism.</li>
+          <li>Creates a professional HTML report for AEs, SEs, leadership, and launch teams.</li>
+          <li>Supports consistent decisions across Proceed, Hold, Need Information, and Potential DQ outcomes.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Install From GitHub</h2>
+        <p class="section-intro">Use the command for your tool. The repository URL is already filled in, so testers can paste the command without customization.</p>
+        <div class="install-grid">
+          <article class="install-card">
+            <h3>Claude <span class="badge">Skill folder</span></h3>
+            <pre><code>git clone https://github.com/TerryKealey/opportunity-confidence.git \
+  "$HOME/.claude/skills/opportunity-confidence"</code></pre>
+          </article>
+          <article class="install-card">
+            <h3>Cursor <span class="badge">Skill folder</span></h3>
+            <pre><code>git clone https://github.com/TerryKealey/opportunity-confidence.git \
+  "$HOME/.cursor/skills/opportunity-confidence"</code></pre>
+          </article>
+          <article class="install-card">
+            <h3>Codex <span class="badge">Skill folder</span></h3>
+            <pre><code>git clone https://github.com/TerryKealey/opportunity-confidence.git \
+  "$HOME/.codex/skills/opportunity-confidence"</code></pre>
+          </article>
+          <article class="install-card">
+            <h3>Pi <span class="badge">Skill folder</span></h3>
+            <pre><code>git clone https://github.com/TerryKealey/opportunity-confidence.git \
+  "$HOME/.pi/skills/opportunity-confidence"
+
+# If your Pi setup reads from the agent skill path:
+ln -s "$HOME/.pi/skills/opportunity-confidence" \
+  "$HOME/.pi/agent/skills/opportunity-confidence"</code></pre>
+          </article>
+        </div>
+        <p class="note">After installing, restart the agent or start a new chat so the skill loader can discover the new <code>SKILL.md</code> file.</p>
+      </section>
+
+      <section>
+        <h2>How To Test</h2>
+        <p class="section-intro">After installation, testers should only need to name the opportunity. The skill handles the scoring structure and report format.</p>
+        <div class="test-block">
+          <div class="prompt">Run Opportunity Confidence for St. Croix Rods.</div>
+          <div class="prompt">Run the skill for TOMS B2B.</div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Publish this file as <code>index.html</code> in a GitHub Pages repository or in a <code>docs/</code> folder with GitHub Pages enabled.
+    </footer>
+  </div>
+</body>
+</html>
