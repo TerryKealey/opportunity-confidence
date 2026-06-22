@@ -285,6 +285,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       margin: 0;
       padding: 8px 10px;
       border-bottom: 2px solid #003399;
@@ -292,6 +293,17 @@
       background: #d7ecff;
       font-size: 14px;
       text-transform: uppercase;
+    }
+
+    .install-title {
+      min-width: 0;
+    }
+
+    .install-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
     }
 
     .badge {
@@ -303,6 +315,28 @@
       font-weight: 850;
       text-transform: uppercase;
       letter-spacing: .06em;
+    }
+
+    .copy-button {
+      min-height: 28px;
+      padding: 4px 10px;
+      border: 2px outset #ffffff;
+      color: #001d66;
+      background: linear-gradient(180deg, #ffffff, #b7d7ff);
+      font-family: Verdana, Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .copy-button:active {
+      border-style: inset;
+    }
+
+    .copy-button.copied {
+      color: #001d66;
+      background: linear-gradient(180deg, var(--lime), var(--green));
     }
 
     pre {
@@ -565,8 +599,8 @@
         <p class="note">Prefer a download? Use the packaged zip: <a href="https://github.com/TerryKealey/opportunity-confidence/raw/main/opportunity-confidence.zip">opportunity-confidence.zip</a>. Extract it, then move the extracted <code>opportunity-confidence</code> folder into the matching skill folder for Claude, Cursor, Codex, or Pi.</p>
         <div class="install-grid">
           <article class="install-card">
-            <h3>Zip Download <span class="badge">No git</span></h3>
-            <pre><code>Download:
+            <h3><span class="install-title">Zip Download</span><span class="install-actions"><span class="badge">No git</span><button class="copy-button" type="button" data-copy-target="install-zip">Copy</button></span></h3>
+            <pre><code id="install-zip">Download:
 https://github.com/TerryKealey/opportunity-confidence/raw/main/opportunity-confidence.zip
 
 Extract, then move the opportunity-confidence folder into:
@@ -576,23 +610,23 @@ $HOME/.codex/skills/
 $HOME/.pi/skills/</code></pre>
           </article>
           <article class="install-card">
-            <h3>Claude <span class="badge">Skill folder</span></h3>
-            <pre><code>git clone https://github.com/TerryKealey/opportunity-confidence.git \
+            <h3><span class="install-title">Claude</span><span class="install-actions"><span class="badge">Skill folder</span><button class="copy-button" type="button" data-copy-target="install-claude">Copy</button></span></h3>
+            <pre><code id="install-claude">git clone https://github.com/TerryKealey/opportunity-confidence.git \
   "$HOME/.claude/skills/opportunity-confidence"</code></pre>
           </article>
           <article class="install-card">
-            <h3>Cursor <span class="badge">Skill folder</span></h3>
-            <pre><code>git clone https://github.com/TerryKealey/opportunity-confidence.git \
+            <h3><span class="install-title">Cursor</span><span class="install-actions"><span class="badge">Skill folder</span><button class="copy-button" type="button" data-copy-target="install-cursor">Copy</button></span></h3>
+            <pre><code id="install-cursor">git clone https://github.com/TerryKealey/opportunity-confidence.git \
   "$HOME/.cursor/skills/opportunity-confidence"</code></pre>
           </article>
           <article class="install-card">
-            <h3>Codex <span class="badge">Skill folder</span></h3>
-            <pre><code>git clone https://github.com/TerryKealey/opportunity-confidence.git \
+            <h3><span class="install-title">Codex</span><span class="install-actions"><span class="badge">Skill folder</span><button class="copy-button" type="button" data-copy-target="install-codex">Copy</button></span></h3>
+            <pre><code id="install-codex">git clone https://github.com/TerryKealey/opportunity-confidence.git \
   "$HOME/.codex/skills/opportunity-confidence"</code></pre>
           </article>
           <article class="install-card">
-            <h3>Pi <span class="badge">Skill folder</span></h3>
-            <pre><code>git clone https://github.com/TerryKealey/opportunity-confidence.git \
+            <h3><span class="install-title">Pi</span><span class="install-actions"><span class="badge">Skill folder</span><button class="copy-button" type="button" data-copy-target="install-pi">Copy</button></span></h3>
+            <pre><code id="install-pi">git clone https://github.com/TerryKealey/opportunity-confidence.git \
   "$HOME/.pi/skills/opportunity-confidence"
 
 # If your Pi setup reads from the agent skill path:
@@ -617,5 +651,41 @@ ln -s "$HOME/.pi/skills/opportunity-confidence" \
       Built for team testing. Install, restart your agent, then run <code>Opportunity Confidence</code> for any opportunity name.
     </footer>
   </div>
+  <script>
+    document.querySelectorAll("[data-copy-target]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const target = document.getElementById(button.dataset.copyTarget);
+        if (!target) return;
+        const text = target.innerText.trim();
+
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+          }
+
+          const originalLabel = button.textContent;
+          button.textContent = "Copied";
+          button.classList.add("copied");
+          window.setTimeout(() => {
+            button.textContent = originalLabel;
+            button.classList.remove("copied");
+          }, 1400);
+        } catch (error) {
+          button.textContent = "Select";
+          target.parentElement.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
