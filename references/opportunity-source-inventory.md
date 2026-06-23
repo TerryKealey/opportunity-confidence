@@ -16,14 +16,15 @@ The intent is to combine historical Shopify experiential data with current oppor
 
 ## Recommended Evidence Priority
 
-1. Salesforce opportunity/account/case data — source of truth for opportunity metadata, ownership, stage, revenue, close date, launch case, products, and pipeline history.
-2. SE-NTRAL merchant context — highest-value qualitative source for discovery, technical assessments, PMF assessments, solution notes, and merchant-specific risks.
-3. Sales calls/transcripts, email, Slack, and calendar artifacts — best source for live momentum, stakeholder behavior, urgency, objections, and next-step quality.
-4. Launch data and store telemetry — best source for Launch Confidence once a merchant has signed or entered launch.
-5. Historical Closed Lost / DQ calibration data — pattern-matching layer to avoid repeating known pursuit mistakes.
-6. Shopify product and platform documentation — technical feasibility validation, not deal sentiment.
-7. External public data — company size, market signals, ecommerce maturity, funding/news, and competitive context.
-8. User-provided notes/files — useful but should be tagged as user-provided and reconciled against system data.
+1. CRM opportunity data table — structured opportunity metadata from `shopify-dw.sales.sales_opportunities`; use before declaring opportunity-specific Salesforce data unavailable.
+2. Salesforce opportunity/account/case data — source of truth for opportunity metadata, ownership, stage, revenue, close date, launch case, products, and pipeline history when direct Salesforce tools are available.
+3. SE-NTRAL merchant context — highest-value qualitative source for discovery, technical assessments, PMF assessments, solution notes, and merchant-specific risks.
+4. Sales calls/transcripts, email, Slack, and calendar artifacts — best source for live momentum, stakeholder behavior, urgency, objections, and next-step quality.
+5. Launch data and store telemetry — best source for Launch Confidence once a merchant has signed or entered launch.
+6. Historical Closed Lost / DQ calibration data — pattern-matching layer to avoid repeating known pursuit mistakes.
+7. Shopify product and platform documentation — technical feasibility validation, not deal sentiment.
+8. External public data — company size, market signals, ecommerce maturity, funding/news, and competitive context.
+9. User-provided notes/files — useful but should be tagged as user-provided and reconciled against system data.
 
 ## Category-Specific Source Mapping
 
@@ -31,6 +32,7 @@ The intent is to combine historical Shopify experiential data with current oppor
 
 Primary sources:
 
+- CRM opportunity table: `shopify-dw.sales.sales_opportunities` fields such as `current_stage_name`, `amount_usd`, `expected_revenue_usd`, `total_acv_amount_usd`, `incremental_annual_b2b_usd`, `annual_online_revenue_verified_usd`, `annual_total_revenue_verified_usd`, `primary_product_interest`, `opportunity_type`, `record_type`, `merchant_intent`, `forecast_category`, `next_step`, `close_date`, `updated_at`, `salesforce_owner_name`, and territory fields.
 - Salesforce Opportunity: stage, revenue, close date, products, forecast, NextStep, competitors, stage age.
 - Salesforce Account and Copilot Accounts: GMV/revenue, industry, region, store/location count, product eligibility, existing Shopify footprint.
 - Discovery/briefing docs: pain severity, business objectives, economic buyer, decision criteria.
@@ -76,6 +78,7 @@ Score down when:
 
 Primary sources:
 
+- CRM opportunity table: `current_stage_name`, `probability_of_closing`, `forecast_category`, `next_step`, `close_date`, `created_at`, `updated_at`, `qualified_date`, `first_sales_activity_date`, `compelling_event`, and `merchant_intent`.
 - Salesforce tasks/events/emails and stage history.
 - Salesloft activities, calls, meetings, conversations.
 - Gmail search for buyer responsiveness and next steps.
@@ -179,23 +182,24 @@ When confidence is low, cap strong recommendations and ask for the missing evide
 
 ## Suggested Skill Workflow
 
-1. Resolve merchant/opportunity. Search SE-NTRAL/local folders, then Salesforce by merchant name or Opp ID.
-2. Gather system-of-record data. Pull Salesforce opportunity, account, team, contacts, products, activities, quote, and cases.
-3. Gather qualitative evidence. Read SE-NTRAL docs, Drive docs, PMF/tech assessments, partner SOWs, and local files.
-4. Gather live momentum. Pull recent Gmail, calendar, Salesloft, Slack, and transcripts where available.
-5. Gather launch evidence. For late-stage/closed-won deals, check Launch Case and store/shop telemetry.
-6. Run historical calibration. Compare against DQ patterns and prior reports.
-7. Score dimensions. Score Commercial Fit, Technical Fit, Momentum, and Launch Confidence from 0-100.
-8. Run false-DQ check. Before recommending disqualification, check for executive sponsorship, strategic value, solvable blockers, and new evidence.
-9. Output source audit. Every score should include source tags and missing evidence that could change the score.
+1. Resolve merchant/opportunity. Search SE-NTRAL/local folders, then use an exact Salesforce opportunity id when present.
+2. Gather structured CRM data. Query `shopify-dw.sales.sales_opportunities` by `opportunity_id` or likely opportunity/merchant name. Use `references/crm-opportunity-data-table.md` and the live field map at `https://crm-fieldmap.quick.shopify.io/?tab=fields`.
+3. Gather system-of-record data. Pull Salesforce opportunity, account, team, contacts, products, activities, quote, and cases when direct Salesforce tools are available.
+4. Gather qualitative evidence. Read SE-NTRAL docs, Drive docs, PMF/tech assessments, partner SOWs, and local files.
+5. Gather live momentum. Pull recent Gmail, calendar, Salesloft, Slack, and transcripts where available.
+6. Gather launch evidence. For late-stage/closed-won deals, check Launch Case and store/shop telemetry.
+7. Run historical calibration. Compare against DQ patterns and prior reports.
+8. Score dimensions. Score Commercial Fit, Technical Fit, Momentum, and Launch Confidence from 0-100.
+9. Run false-DQ check. Before recommending disqualification, check for executive sponsorship, strategic value, solvable blockers, and new evidence.
+10. Output source audit. Every score should include source tags and missing evidence that could change the score.
 
 ## Guardrails
 
 - Never fabricate ARR, GMV, stage, close date, names, owners, transcripts, or technical requirements.
-- Do not treat internal sentiment as buyer evidence unless buyer behavior supports it.
+- Do not treat CRM stage, forecast, or internal sentiment as buyer evidence unless buyer behavior supports it.
 - Do not over-score momentum based only on seller activity.
 - Do not DQ solely because technical fit is incomplete if a credible partner/custom path exists.
 - Do not score Launch Confidence high without an implementation owner and timeline evidence.
-- Tag material claims with source family: `[Salesforce]`, `[SE-NTRAL]`, `[Gmail]`, `[Slack]`, `[Salesloft]`, `[Calendar]`, `[BQ]`, `[Partner-SOW]`, `[PMF]`, `[Shopify Docs]`, `[DQ-Calibration]`, `[User-provided]`, or `[Inference]`.
+- Tag material claims with source family: `[CRM Table]`, `[Salesforce]`, `[SE-NTRAL]`, `[Gmail]`, `[Slack]`, `[Salesloft]`, `[Calendar]`, `[BQ]`, `[Partner-SOW]`, `[PMF]`, `[Shopify Docs]`, `[DQ-Calibration]`, `[User-provided]`, or `[Inference]`.
 - If sources conflict, state the conflict and lower evidence confidence rather than averaging it away.
 - Scores are decision support, not automatic CRM actions.
