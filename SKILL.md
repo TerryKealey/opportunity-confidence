@@ -57,13 +57,96 @@ Use available sources; parallelize where possible.
 
 | Source | Use for |
 | --- | --- |
+| CRM opportunity data table | Structured opportunity metadata from `shopify-dw.sales.sales_opportunities`: stage, amount, close date, owner, territory, source, product interest, next step, forecast, revenue fields, result reasons, and Salesforce account/opportunity identifiers. Use this before marking Salesforce data unavailable. |
 | Salesforce | Stage, amount, close date, `NextStep`, owner/team, record type, products, tasks/events, win/loss history. |
 | SE-NTRAL | Discovery, technical assessment, briefings, solution notes, launch constraints. |
 | Buyer communications | Gmail, Salesloft, call transcripts, calendar, meeting notes, Slack deal context, and user-provided messages for persona buy-in, objections, blockers, and next-step ownership. |
 | User paste/chat | Call notes, email snippets, Slack excerpts; tag as user-provided. |
 | Revenue/SOQL MCP | Use when available; if blocked, state data gap and confidence caveat. |
+| Field map | Use `https://crm-fieldmap.quick.shopify.io/?tab=fields` as the canonical live reference for available CRM table fields when authenticated access is available. |
 
 Never fabricate amounts, names, dates, owners, GMV, or stage. Mark unknowns as `unknown`.
+
+## CRM Opportunity Data Table
+
+Before scoring an opportunity, query the CRM opportunity data table whenever a BigQuery / warehouse query tool is available. This table is the structured fallback when direct Salesforce tooling is unavailable, and it should prevent avoidable `Need Information` outcomes caused only by missing Salesforce MCP access.
+
+Read the bundled reference `references/crm-opportunity-data-table.md` before building the query. The live field catalog is:
+
+```text
+https://crm-fieldmap.quick.shopify.io/?tab=fields
+```
+
+Use `shopify-dw.sales.sales_opportunities` as the primary opportunity table. Query by exact `opportunity_id` when the user provides a Salesforce opportunity id. If only a merchant or opportunity name is provided, search by `name`, account/merchant fields visible in the live field map, and recent `updated_at`, then choose the most likely open/recent opportunity. If multiple plausible matches remain, ask the user which opportunity to score rather than guessing.
+
+Minimum CRM fields to request when available:
+
+```sql
+SELECT
+  opportunity_id,
+  name,
+  current_stage_name,
+  opportunity_type,
+  record_type,
+  primary_product_interest,
+  product_quantity,
+  amount_usd,
+  expected_revenue_usd,
+  total_acv_amount_usd,
+  total_revenue_usd,
+  incremental_annual_b2b_usd,
+  annual_online_revenue_verified_usd,
+  annual_total_revenue_verified_usd,
+  close_date,
+  created_at,
+  updated_at,
+  qualified_date,
+  first_sales_activity_date,
+  probability_of_closing,
+  forecast_category,
+  next_step,
+  description,
+  compelling_event,
+  merchant_intent,
+  primary_result_reason,
+  secondary_result_reason,
+  reason_details,
+  salesforce_account_id,
+  salesforce_owner_id,
+  salesforce_owner_name,
+  salesforce_owner_role,
+  sales_qualifier,
+  territory_name,
+  territory_region,
+  territory_subregion,
+  territory_line_of_business,
+  territory_sales_motion,
+  territory_segment,
+  region,
+  subregion,
+  country_code,
+  source,
+  lead_source,
+  campaign_name,
+  source_system
+FROM `shopify-dw.sales.sales_opportunities`
+WHERE opportunity_id = @opportunity_id
+LIMIT 5
+```
+
+Use CRM evidence in scoring as follows:
+
+- **Commercial Fit:** `amount_usd`, `expected_revenue_usd`, `total_acv_amount_usd`, `total_revenue_usd`, `incremental_annual_b2b_usd`, `annual_online_revenue_verified_usd`, `annual_total_revenue_verified_usd`, `primary_product_interest`, `opportunity_type`, `record_type`, `merchant_intent`, `territory_segment`.
+- **Technical Fit:** `primary_product_interest`, `record_type`, `description`, `reason_details`, `territory_line_of_business`, `territory_sales_motion`, plus SE-NTRAL technical notes. CRM table fields can indicate scope, but they do not replace technical assessment evidence.
+- **Momentum:** `current_stage_name`, `probability_of_closing`, `forecast_category`, `next_step`, `close_date`, `created_at`, `updated_at`, `qualified_date`, `first_sales_activity_date`, `compelling_event`, `merchant_intent`.
+- **Launch Confidence:** `close_date`, `next_step`, `description`, `compelling_event`, `primary_product_interest`, `territory_sales_motion`, `salesforce_owner_name`, `sales_qualifier`, plus launch case, MAP, partner/SOW, implementation owner, and buyer onboarding evidence when available.
+
+Important constraints:
+
+- Treat CRM table data as structured opportunity metadata, not buyer-side proof. It can raise confidence in stage, ownership, amount, close date, and next step, but it should not replace emails, meeting notes, stakeholder maps, or technical assessments.
+- Do not expose raw SQL in the HTML report. Summarize the loaded CRM facts in the metadata line, score details, and synopsis.
+- If the field map or BigQuery query is inaccessible, say exactly that and continue with available sources. Do not claim Salesforce/CRM data is missing when only direct Salesforce MCP is unavailable but the CRM table has not been attempted.
+- Tag CRM-derived statements as `[CRM Table]` in any Markdown/chat summary.
 
 ## Source Discovery Guide
 
